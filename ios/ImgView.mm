@@ -1,11 +1,15 @@
 #import "ImgView.h"
 
+#import <React/RCTConversions.h>
+#import <RCTTypeSafety/RCTConvertHelpers.h>
+
 #import <react/renderer/components/RNImgViewSpec/ComponentDescriptors.h>
 #import <react/renderer/components/RNImgViewSpec/EventEmitters.h>
 #import <react/renderer/components/RNImgViewSpec/Props.h>
 #import <react/renderer/components/RNImgViewSpec/RCTComponentViewHelpers.h>
 
 #import "RCTFabricComponentsPlugins.h"
+#import "react-native-img-Swift.h"
 
 using namespace facebook::react;
 
@@ -14,7 +18,12 @@ using namespace facebook::react;
 @end
 
 @implementation ImgView {
-    UIView * _view;
+    ImgViewComponent * _view;
+}
+
++ (BOOL)requiresMainQueueSetup
+{
+    return NO;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -28,7 +37,7 @@ using namespace facebook::react;
     static const auto defaultProps = std::make_shared<const ImgViewProps>();
     _props = defaultProps;
 
-    _view = [[UIView alloc] init];
+    _view = [[ImgViewComponent alloc] init];
 
     self.contentView = _view;
   }
@@ -40,10 +49,12 @@ using namespace facebook::react;
 {
     const auto &oldViewProps = *std::static_pointer_cast<ImgViewProps const>(_props);
     const auto &newViewProps = *std::static_pointer_cast<ImgViewProps const>(props);
-
-    if (oldViewProps.color != newViewProps.color) {
-        NSString * colorToConvert = [[NSString alloc] initWithUTF8String: newViewProps.color.c_str()];
-        [_view setBackgroundColor:[self hexStringToColor:colorToConvert]];
+    
+    if (oldViewProps.nativeProps.src != newViewProps.nativeProps.src) {
+        BOOL *local = new BOOL;
+        *local = newViewProps.nativeProps.local;
+        NSString *src = RCTNSStringFromString(newViewProps.nativeProps.src);
+        [_view setSrc:src];
     }
 
     [super updateProps:props oldProps:oldProps];
@@ -52,20 +63,6 @@ using namespace facebook::react;
 Class<RCTComponentViewProtocol> ImgViewCls(void)
 {
     return ImgView.class;
-}
-
-- hexStringToColor:(NSString *)stringToConvert
-{
-    NSString *noHashString = [stringToConvert stringByReplacingOccurrencesOfString:@"#" withString:@""];
-    NSScanner *stringScanner = [NSScanner scannerWithString:noHashString];
-    
-    unsigned hex;
-    if (![stringScanner scanHexInt:&hex]) return nil;
-    int r = (hex >> 16) & 0xFF;
-    int g = (hex >> 8) & 0xFF;
-    int b = (hex) & 0xFF;
-    
-    return [UIColor colorWithRed:r / 255.0f green:g / 255.0f blue:b / 255.0f alpha:1.0f];
 }
 
 @end

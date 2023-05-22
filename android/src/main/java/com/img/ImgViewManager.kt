@@ -1,6 +1,7 @@
 package com.img
 
 import android.graphics.Color
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
@@ -31,9 +32,13 @@ class ImgViewManager : SimpleViewManager<ImgView>(),
     return ImgView(context)
   }
 
-  @ReactProp(name = "color")
-  override fun setColor(view: ImgView?, color: String?) {
-    view?.setBackgroundColor(Color.parseColor(color))
+  @ReactProp(name = "nativeProps")
+  override fun setNativeProps(view: ImgView?, nativeProps: ReadableMap?) {
+    val src = nativeProps?.getString("src");
+
+    if (src != null) {
+      view?.setNativeProps(nativeProps)
+    }
   }
 
   companion object {

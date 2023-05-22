@@ -1,15 +1,36 @@
 package com.img
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.util.AttributeSet
-import android.view.View
+import android.net.Uri
+import com.facebook.drawee.backends.pipeline.Fresco
+import com.facebook.drawee.drawable.ScalingUtils
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.react.bridge.ReadableMap
 
-class ImgView : View {
-  constructor(context: Context?) : super(context)
-  constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-  constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-    context,
-    attrs,
-    defStyleAttr
-  )
+
+class ImgView(context: Context?) : SimpleDraweeView(context) {
+
+  init {
+    Fresco.initialize(context)
+  }
+
+  @SuppressLint("DiscouragedApi")
+  fun setNativeProps(nativeProps: ReadableMap){
+    val src = nativeProps.getString("src");
+    val local = nativeProps.getBoolean("local");
+
+    if(BuildConfig.DEBUG){
+      val uriAddress = Uri.parse(src)
+      this.setImageURI(uriAddress);
+    }else{
+      if(local){
+        val resourceId: Int =  context.resources.getIdentifier(src, "drawable", context.packageName)
+        this.setActualImageResource(resourceId)
+      }else{
+        this.setImageURI(src);
+      }
+    }
+    this.hierarchy.actualImageScaleType = ScalingUtils.ScaleType.FIT_CENTER
+  }
 }
